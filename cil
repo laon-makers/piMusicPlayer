@@ -1,0 +1,1 @@
+g++ -o piMusicClient pmc.c

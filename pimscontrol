@@ -1,0 +1,306 @@
+#!/bin/bash
+#   Copyright 2024   Gi Tae Cho
+
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+
+#        http://www.apache.org/licenses/LICENSE-2.0
+
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
+#set -x
+
+cmd='\#'
+fCtrl='0'
+
+while [ "$cmd" != "x" ] ; do
+    if [ "$fCtrl" != "s" ] && [ "$fCtrl" != "S" ] ; then    
+        clear
+    
+        echo "*******************************************************"
+        echo -e "\e[36m 0 m\e[0m\e[32m  Mute\e[0m"
+        echo -e "\e[36m 1 s\e[0m\e[32m  Start player & play music from the 1st song\e[0m"    
+        echo -e "\e[36m 2 +\e[0m\e[32m  Volume Up\e[0m"
+        echo -e "\e[36m 3 -\e[0m\e[32m  Volume Down\e[0m"    
+        echo -e "\e[36m 4 v\e[0m\e[32m  Set volume\e[0m"
+        echo -e "\e[36m 5 r\e[0m\e[32m  Resume playing music\e[0m"
+        echo -e "\e[36m 6 p\e[0m\e[32m  Pause\e[0m"
+        echo -e "\e[36m 7 t\e[0m\e[32m  Stop\e[0m"
+        echo -e "\e[36m 8 n\e[0m\e[32m  Next Song\e[0m"
+        echo -e "\e[36m 9 P\e[0m\e[32m  Previous Song\e[0m"
+
+        echo -e "      /~~~ \e[35mReady\e[0m ~~~~~~~~~~~~~~~\______________________" 
+        echo -e "\e[36m11 S\e[0m  Get the\e[33m piMusicSystem ready\e[0m (piMusicSystem in off state)"
+        echo -e "\e[36m12 i\e[0m  Get the\e[33m piMusicSystem status\e[0m info listed"
+        echo -e "      /~~~ \e[35mOn/Off,Shutdown\e[0m ~~~~~\______________________" 
+        echo -e "\e[36m20 f\e[0m  Turn\e[33m OFF\e[0m Pi Music\e[33m Server\e[0m"
+        echo -e "\e[36m21 o\e[0m  Turn\e[33m ON\e[0m Pi Music\e[33m Server\e[0m"
+        echo -e "\e[36m22  \e[0m  Set Music Stop\e[33m Count Down\e[0m (no shutdown afterward)"
+        echo -e "\e[36m23 d\e[0m  Set Music Stop\e[33m Count Down\e[0m (\e[33mShutdown\e[0m afterward)"
+        echo -e "      /~~~ \e[35mPlay\e[0m ~~~~~~~~~~~~~~~~\______________________" 
+        echo -e "\e[36m31  \e[0m\e[33m  Start\e[0m player &\e[33m play\e[0m music from given song\e[33m number\e[0m"
+        echo -e "\e[36m32  \e[0m\e[33m  Start\e[0m player &\e[33m play\e[0m music\e[33m from & to\e[0m given song number"
+        echo -e "\e[36m33  \e[0m\e[33m  Play\e[0m music from the\e[33m 1st song\e[0m"
+        echo -e "\e[36m34  \e[0m\e[33m  Play\e[0m music from given song\e[33m number\e[0m"
+        echo -e "\e[36m35  \e[0m\e[33m  Play\e[0m music\e[33m from & to\e[0m given song number"
+        echo -e "      /~~~ \e[35mDirectory,Song\e[0m ~~~~~~\______________________" 
+        echo -e "\e[36m41  \e[0m\e[33m  Show\e[0m all song\e[33m directories\e[0m and\e[33m set\e[0m active song directory"
+        echo -e "\e[36m42  \e[0m\e[33m  Set\e[0m active song\e[33m directory\e[0m with directory\e[33m number\e[0m"
+        echo -e "\e[36m43  \e[0m\e[33m  Set\e[0m active song\e[33m directory\e[0m with its\e[33m name\e[0m"
+        echo -e "\e[36m44  \e[0m\e[33m  Show\e[0m list of\e[33m songs\e[0m from active directory ('q' to exit)"
+        echo -e "\e[36m45 a\e[0m\e[33m  Add\e[0m missing song list files"
+        echo -e "\e[36m46 c\e[0m\e[33m  Create/Recreate\e[0m all song list files from scratch"
+        echo -e "      /~~~ \e[35mDebug\e[0m ~~~~~~~~~~~~~~~\______________________"
+        echo -e "\e[36m50  \e[0m  Enable Log"
+        echo -e "\e[36m51 l\e[0m  Show shared memory"
+        echo -e "\e[36m52 k\e[0m  Keep showing shared memory (quit: 'q')"
+        echo -e "\e[36m53  \e[0m  Show build date"
+        echo -e "\e[36m54  \e[0m  Turn on or off the relay/light"
+        echo -e "\e[36m x q\e[0m  Quit"
+        echo -e "      '\e[33mo\e[0m' -> '\e[33ms\e[0m' to play music for the first time since booted. "
+        echo "*******************************************************"
+        echo ""
+    fi
+
+    if [ "$fCtrl" != "S" ]; then
+        echo " Type a number: "
+        echo ""
+
+        read cmd
+    fi
+
+    echo "------------------------------------"
+
+    # Clear Flow Control variable.
+    fCtrl='0'
+
+    case "$cmd" in
+        
+        0|m)  # Mute
+            cd /home/pi/music && ./piMusicClient v '-1' 
+            echo "Mute command has been sent to piMusicClient"
+            ;;            
+        1|s) # Start music player and play music from the 1st song in the playlist.
+            cd /home/pi/music && ./piMusicClient 'S'
+            ;;        
+        2|+)  # Volume up
+            cd /home/pi/music && ./piMusicClient 'v' '++'
+            ;;
+        3|-)  # Volume down
+            cd /home/pi/music && ./piMusicClient 'v' '--'
+            ;;
+        4|v)  # Set volume: % of volume passed in without % sign.
+            cd /home/pi/music; ./piMusicClient '?' 'm'
+            sleep 1
+            echo ""
+            echo "---------------------------------------------"
+            echo "Type one or two digit numers for volume in %: "
+            read arg
+            cd /home/pi/music && ./piMusicClient 'v' "$arg"
+            ;;
+        5|r)  # Resume
+            cd /home/pi/music && ./piMusicClient '>'
+            ;; 
+        6|p)  # Pause
+            cd /home/pi/music && ./piMusicClient '|'
+            ;;
+        7|t)  # Stop
+            cd /home/pi/music && ./piMusicClient '.'
+            ;;
+        8|n)  # Next Song
+            cd /home/pi/music && ./piMusicClient 'n'
+            ;;
+        9)  # Previous Song
+            cd /home/pi/music && ./piMusicClient 'p'
+            ;;
+        
+        11|S) # Get the piMusicSystem ready: use it when piMusicSystem is off.
+            cd /home/pi/music && ./piMusicClient '*' ':'
+            ;;            
+        12|i) # Get the piMusicSystem status: use it when piMusicSystem is on.
+            # It gets not only piMusicSystem is ready if it is not on but also
+            # the status of the system info listed;
+            # piMusicSystem status data in the shared memory.
+            cd /home/pi/music && ./piMusicClient '*' 'i'
+            # plus, show build date even though there is seperate command.
+            cd /home/pi/music; ./piMusicClient '?' 'v'
+            ;;
+            
+        20|f) # Turn OFF Pi Music Server
+            cd /home/pi/music && sudo ./piMusicClient 'q'
+            ;;
+        21|o) # Turn ON Pi Music Server
+            cd /home/pi/music && sudo ./piMusicClient '*' '~'
+            ;;        
+        22) # Set Music Stop Count Down (no shutdown afterward)
+            echo "Type count down number of which songs are played and stopped:"
+            echo ""
+            read arg
+            cd /home/pi/music && ./piMusicClient 'd' 'N' "$arg"
+            ;;        
+        23|d) # Set Music Stop Count Down (Shutdown afterward)
+            echo "Type the number of songs to play before power the music system down:"
+            echo ""
+            read arg
+            cd /home/pi/music && ./piMusicClient 'd' "$arg"
+            ;;        
+            
+        31) # Start music player and play music from the indicated song.
+            echo "Type index number of song to play: "
+            echo ""
+            read arg
+            cd /home/pi/music && ./piMusicClient 'S' "$arg"
+            ;;
+        32) # Start music player and play music from the given
+            #  song index numbers; first and last song index respectively.
+            echo "Need index numbers of songs; start and end of song respectively"
+            echo " Type index number of song to start playing with: "
+            read arg
+            echo " Type index number of song to set as the last song to play: "
+            read arg2
+            cd /home/pi/music && ./piMusicClient 'S' "$arg" "$arg2"
+            ;;
+        33) # Play music from the first song in the playlist.
+            cd /home/pi/music && ./piMusicClient 's' '1'
+            ;;
+        34) # Play music from the song indexed by user.
+            echo "Need an index number of song to play from."
+            echo " Type the index number: "
+            echo ""
+            read arg
+            cd /home/pi/music && ./piMusicClient 's' "$arg"
+            ;;
+        35) # Play music from and to the songs indexed by user;
+            # first song and the last song respectively.
+            echo "Need index numbers of songs; start and end of song respectively"
+            echo " Type index number of song to start playing with: "
+            echo ""
+            read arg
+            echo " Type index number of song to set as the last song to play: "
+            echo ""
+            read arg2
+            cd /home/pi/music && ./piMusicClient 's' "$arg" "$arg2"
+            ;;
+            
+        41) # Show all song directories and set active directory
+            cnt=0
+            cd /home/pi/music
+            #./piMusicClient '/' | while read line ; do let "cnt+=1"; echo -e "$cnt - $line\n"; done;
+            ./piMusicClient '/' | while read line ; do let "cnt+=1"; echo "$cnt - $line"; done;
+            fCtrl='S'
+            cmd=42
+            ;;
+        42) # Set new playlist directory: new directory index number passed in.
+            echo "Type the directory number to set it as active directory."
+            echo "Hit Enter key to skip this option"
+            echo "(directory number starts with 1 and increament by 1): "
+            echo ""
+            read arg
+            if [ "$arg" != "" ]; then
+                cd /home/pi/music
+                ./piMusicClient '\' "$(./piMusicClient '/' | cut -d$'\n' -f$arg)"
+                sleep 2
+                fCtrl='S'
+                cmd=33
+            fi
+            ;;        
+        43) # Type playlist directory name to set it as active directory and
+            # to get the list of songs under the directory displayed.
+            echo "Type directoy name to set it as active song directory and "
+            echo " to list songs from the active directory"
+            echo " (hit Return key to skip this option): "
+            echo ""
+            read arg
+            if [ "$arg" != "" ]; then
+                cd /home/pi/music; ./piMusicClient '=' "$arg"
+            fi
+            ;;
+        44) # Show list of songs from existing directory.
+            cd /home/pi/music
+            echo "Hit 'q' key to exit the list mode !"
+            ./piMusicClient '-' | less
+            ;;
+        45|a) # Add missing song list files if there are any missing files.
+            cd /home/pi/music; ./piMusicClient 'a'
+            ;;
+        46|c) # Create song list files by removing old files.
+            cd /home/pi/music; ./piMusicClient 'c'
+            ;;
+
+        50) # Enable Log
+            cd /home/pi/music; ./piMusicClient '*' 'L'
+            ;;
+        51|l) # Show shared memory
+            cd /home/pi/music; ./piMusicClient '?' 'm'
+          
+            #if [ "$(pidof ipAppStable)" != "" ]; then echo -e "\tipAppStable:\tOn"; else echo -e "\tipAppStable:\tOff"; fi
+            #if [ "$(pidof ipStatus)" != "" ]; then echo -e "\tipStatus:\tOn"; else echo -e "\tipStatus:\tOff"; fi
+            ;;
+        52|k) # Keep showing shared memory
+            echo " Enter a number to set repeat period in second"
+            echo " or Hit Enter to use default 2 seconds: "
+            echo ""
+            read arg
+            dly=2
+            if [ "$arg" != "" ]; then
+                dly=$arg
+            fi
+
+            key=0;
+            while [ "$key" != "q" ] ; do
+                clear
+                cd /home/pi/music; ./piMusicClient '?' 'm'
+                echo -e "\n Hit 'q' and Enter key to exit"
+                read -t $dly key
+            done
+            ;;
+        53) # Show build date
+            cd /home/pi/music; ./piMusicClient '?' 'v'
+            sleep 2 
+            ;;
+        54) # Turn on or off the relay.
+            echo "Type '1' to trun on the relay or '0' to turn it off."
+            echo " Type a number (1/0): "
+            echo ""
+            read arg
+            if [ "$arg" == "1" ]; then
+                echo +l > /sys/class/ledControl/set/led
+            elif [ "$arg" == "0" ]; then
+                echo -l > /sys/class/ledControl/set/led
+            else
+                echo "Typed wrong number. Please type either 1 or 0."
+                sleep 1 
+            fi
+            sleep 1
+            ;;
+
+        [xXqQ]) # eixt
+            echo ""
+            echo "Being quit the script...."
+            echo "Goodbye!"
+            exit 
+            ;;
+        *)  echo ""
+            echo "Woops!!!"
+            echo "Invalid number typed!!"
+            echo -e "Please try again.\n"
+            
+            read arg
+            ;;
+    esac
+ 
+    # pause to show results.
+    case "$cmd" in
+        12|43|44|51|l|53)
+            echo -e "------------------------------------\n"
+            echo -e "Press Enter/Return key to continue..\n"
+            read arg
+            ;;
+    esac
+done
+#set +x

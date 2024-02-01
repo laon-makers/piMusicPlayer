@@ -1,0 +1,69 @@
+#!/bin/bash
+#   Copyright 2024   Gi Tae Cho
+
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+
+#        http://www.apache.org/licenses/LICENSE-2.0
+
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
+#set -x
+cp -u pms.c /mnt/wsi
+#cp -u piMusicServer.h /mnt/wsi
+cp -u pms.h /mnt/wsi
+cd /mnt/wsi
+
+echo "Compiling...."
+
+if [ $# -gt 0 ]; then
+    if [ "$1" == "n" ]; then
+        echo "  Soon, the result file will be avalable in /mnt/wsi since you pass in the argument 'n'"
+        echo "  '/mnt/wsi' folder since you pass in the argument 'n'"
+    else
+        echo "  Soon, the result file will be copied into the source folder since there was no argument."
+        echo "  Use 'n' argument to skip the copy, then you can find the result only in /mnt/wsi"
+    fi
+else
+     echo "  Soon, the result file will be copied into the source folder since there was no argument."
+     echo "  Use 'n' argument to skip the copy, then you can find the result only in /mnt/wsi"
+fi
+
+# use following if the source code doesn't include pthread.
+#g++ -o piMusicServer pms.c
+
+# use following if the source code includes pthread, otherwies you would get the error, "undefined reference to pthread_create"
+g++ -pthread -o piMusicServer pms.c
+
+
+if [ $? -ne 0 ]; then
+#    echo "Unable to copy missing file!"
+    exit
+fi
+
+if [ $# -gt 0 ]; then
+    if [ "$1" == "n" ] || [ "$1" == "N" ]; then
+        echo -e "\n\t --- Result file is in '/mnt/wsi'"
+    else
+        cp -u piMusicServer /home/pi/music
+    fi
+else
+    cp -u piMusicServer /home/pi/music
+fi
+
+echo "."
+echo "."
+echo "."
+
+if [ $? -eq 0 ]; then
+    echo "Build Success !"
+else
+    echo "Build Fail !"
+fi
+
+#set +x

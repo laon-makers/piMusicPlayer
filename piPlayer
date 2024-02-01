@@ -1,0 +1,239 @@
+#!/bin/bash
+#   Copyright 2024   Gi Tae Cho
+
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+
+#        http://www.apache.org/licenses/LICENSE-2.0
+
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
+#set -x
+
+#mPath="/home/pi/music/melon0615"
+
+if [ ! -e "/mnt/wsi/mp3fifo" ]; then
+    mkfifo -m +rw /mnt/wsi/mp3fifo
+    if [ $? -ne 0 ]; then
+        echo "Fail to open /mnt/wsi/mp3fifo"
+        exit 1
+    fi 
+fi
+
+if [ ! -f "/mnt/wsi/plyStatus" ]; then
+    touch /mnt/wsi/plyStatus
+    chmod a+w /mnt/wsi/plyStatus
+    if [ $? -ne 0 ]; then
+        echo "Fail to handle /mnt/wsi/plyStatus"
+        exit 1
+    fi 
+fi
+
+ply=$(pidof mpg123)
+
+if [ "$ply" == "" ];then
+    mpg123 -qR --fifo /mnt/wsi/mp3fifo > /mnt/wsi/plyStatus &
+    sleep 1 
+    if [ "$(pidof mpg123)" == "" ]; then 
+        sleep 1;
+        if [ "$(pidof mpg123)" == "" ]; then 
+            sleep 1;
+            if [ "$(pidof mpg123)" == "" ]; then 
+                sleep 1;
+            fi
+        fi
+    fi
+
+    sleep 1;
+
+    echo 'silence' > /mnt/wsi/mp3fifo
+   
+fi
+
+#if [ ! -f /mnt/wsi/dbgpl ]; then
+#    touch /mnt/wsi/dbgpl
+#fi
+
+echo $(date) > /mnt/wsi/dbgpl
+echo $(pwd) >> /mnt/wsi/dbgpl
+echo "Args: $#, $@" >> /mnt/wsi/dbgpl
+
+# Start LED module to blink either red or green LED.
+#set -x
+
+#if [ ! -f /mnt/wsi/plyStatus ]; then
+#    touch /mnt/wsi/plyStatus
+#else
+    echo "$(date)" > /mnt/wsi/plyStatus
+#fi
+
+if [ $# -gt 0 ]; then
+    if [ "$1" == '~' ] || [ "$1" == 'c' ]; then
+        exit 0
+    fi
+fi 
+
+#cd /home/pi/music/melon0615
+#file="playlist_melon0615.txt"
+cd /mnt/wsi
+file="/mnt/wsi/playlist.txt"
+#file="./plist.txt"
+
+if [ ! -f "$file" ]; then
+    ls /home/pi/music/favorite/*.mp3 > "$file"
+fi
+
+
+
+lastsong=500
+count=0
+
+if [ $# -eq 0 ]; then 
+    # No argument:
+    start=1
+    end=$lastsong
+
+else
+    start=1
+
+    if [ $# -gt 0 ]; then
+        # Following two lines are for testing if '$1' is number.
+        var=$1
+        
+        if [ "$var" -eq "$1" ] 2>/dev/null ; then
+            # Yes. '$1' is a number.
+            if [ $1 -gt 0 ]; then
+                start=$1
+            fi
+        fi
+
+    fi
+    
+    
+    if [ $# -gt 1 ]; then
+   
+        var=$2
+        if [ "$var" -eq "$2" ] 2>/dev/null; then
+            # yes, '$3' is a number too.
+            end=$2
+        else
+            # no, '$3' isn't a number.
+            echo " * Error!"
+            echo "   You have type wrong 2nd number which is $var." >> /mnt/wsi/dbgpl
+            echo "   Please try it again!"
+
+            exit 1
+        fi
+    else
+        end=$lastsong
+    fi
+fi
+
+
+#echo "************* Keys ************"
+#echo "* exit: Ctrl-c twice quickly."
+#echo "        Note: Ctrl-z doesn't"
+#echo "              kill processes."
+#echo "* previous song: Up arrow key"
+#echo "* next song: Down arrow key"
+#echo "* rewind: Left arrow key"
+#echo "* fastforwrd: Right arrow key"
+#echo "* volume cmd: amixer sset PCM,0 90%"
+#echo "******************************"
+#echo ""
+
+
+echo "Agrs, start, stop: $#, $start, $end" >> /mnt/wsi/dbgpl
+
+if [ "$(pidof mpg123)" == "" ]; then
+    echo "mpg123 is not available yet. It will wait for a few seconds" >> /mnt/wsi/dbgpl
+    #sleep 3
+fi
+
+#while IFS='' read -r line || [[ -n "$line" ]]; do
+#    let "count++"
+  
+#    echo "Song $count : $line" >> /mnt/wsi/dbgpl
+
+#    if [ $start -le $count ] && [ $end -ge $count ]; then
+        #echo "$count)----->> $line"
+
+
+#        if [ "$(pidof mpg123)" != "" ]; then
+        
+            # if there is an exception in playing 'omxplayer',
+            # then 'popd' will be executed by the operator '||'. 
+            # Otherwise 'popd' won't be executed.
+            #omxplayer "$line" || popd;
+            
+            #echo load "$(mPath)/$line" >> /mnt/wsi/mp3fifo           
+#            echo "load $line" >> /mnt/wsi/mp3fifo           
+#            echo "Playing # $count" >> /mnt/wsi/dbgpl
+#	    while [ "$(cat /mnt/wsi/plyStatus | grep 'P 0')" == "" ]; do
+#	        sleep 2
+#                if [ "$(pidof mpg123)" == "" ]; then
+#                    exit 0;
+#                fi
+#            done
+
+#            echo > /mnt/wsi/plyStatus
+#        else
+#            echo "*********************************" >> /mnt/wsi/dbgpl
+#            break          
+#        fi
+#    fi
+#done < $file
+
+total=$(wc -l /mnt/wsi/playlist.txt | cut -d ' ' -f1)
+
+if [ $? -ne 0 ] || [ $total -le 0 ] ; then 
+    exit 1;
+fi
+
+while true; do
+    let "count++"
+  
+
+    if [ $start -le $count ] && [ $end -ge $count ]; then
+
+
+        if [ "$(pidof mpg123)" != "" ]; then
+        
+            echo "loadlist $count /mnt/wsi/playlist.txt" >> /mnt/wsi/mp3fifo           
+            echo "Playing # $count" >> /mnt/wsi/dbgpl
+	    while [ "$(cat /mnt/wsi/plyStatus | grep 'P 0')" == "" ]; do
+	        sleep 2
+                if [ "$(pidof mpg123)" == "" ]; then
+                    exit 0;
+                fi
+            done
+
+            echo > /mnt/wsi/plyStatus
+        else
+            echo "*********************************" >> /mnt/wsi/dbgpl
+            break          
+        fi
+
+
+        if [ $count -ge $total ]; then
+            break;
+        fi
+    fi
+done
+#set +x
+
+if [ $count -lt $start ]; then
+    echo "* Out of range!"
+    echo "  The number of songs in the play list is '$count'."
+    echo "  Use './ml.sh -h' command to view the list of songs."
+fi
+
+echo "<>" >> /mnt/wsi/dbgpl
+# return to the directory where this shell was exeucted.
+#popd
+
